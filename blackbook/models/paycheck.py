@@ -7,10 +7,13 @@ from djmoney.money import Money
 
 from .base import get_default_currency
 
+import uuid
+
 
 class Paycheck(models.Model):
     date = models.DateField("date", default=timezone.localdate)
     amount = MoneyField("amount", max_digits=15, decimal_places=2, default_currency=get_default_currency(), default=0)
+    uuid = models.UUIDField("UUID", default=uuid.uuid4, editable=False, db_index=True, unique=True)
 
     created = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)

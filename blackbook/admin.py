@@ -152,10 +152,11 @@ class PaycheckAdmin(TotalsumAdmin):
 
     ordering = ["date"]
     date_hierarchy = "date"
-    list_display = ["format_date", "amount", "created", "modified"]
+    list_display = ["format_date", "amount", "uuid", "created", "modified"]
     readonly_fields = ["amount", "created", "modified"]
     inlines = [PaycheckItemInline]
-    fieldsets = [[None, {"fields": ("date", "amount")}], ["General information", {"fields": ("created", "modified")}]]
+    fieldsets = [[None, {"fields": ("date", "amount")}], ["General information", {"fields": ("uuid",)}]]
+    readonly_fields = ["uuid"]
     totalsum_list = ["amount"]
     unit_of_measure = "&euro;"
 
