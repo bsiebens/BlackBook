@@ -31,7 +31,6 @@ def accounts(request, account_type=None, account_slug=None):
         period_in = Money(transactions.filter(amount__gte=0).aggregate(total=Coalesce(Sum("amount"), Decimal(0)))["total"], account.currency)
         period_out = Money(transactions.filter(amount__lte=0).aggregate(total=Coalesce(Sum("amount"), Decimal(0)))["total"], account.currency)
         period_balance = period_in + period_out
-        account.total = account.balance_until_date()
 
         charts = {
             "account_chart": AccountChart(
