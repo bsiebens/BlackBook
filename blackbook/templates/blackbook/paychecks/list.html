@@ -1,0 +1,198 @@
+{% extends 'blackbook/base.html' %}
+
+{% load djmoney %}
+{% load l10n %}
+
+{% block titles %}
+    Paycheck
+{% endblock %}
+
+{% block breadcrumbs %}
+    <li>Paychecks</li>
+{% endblock %}
+
+{% block content %}
+    <div class="card">
+        <header class="card-header">
+            <p class="card-header-title">
+                <span class="icon">
+                    <i class="fas fa-chart-line"></i>
+                </span>
+                <span>Paycheck overview - last 12 months</span>
+            </p>
+        </header>
+        <div class="card-content">
+            <div class="chart-area">
+                <div style="height: 100%;">
+                    <div class="chartjs-size-monitor">
+                        <div class="chartjs-size-monitor-expand">
+                            <div></div>
+                        </div>
+                        <div class="chartjs-size-monitor-shrink">
+                            <div></div>
+                        </div>
+                    </div>
+                    <canvas id="account-bar-chart" width="2992" height="1000" class="chartjs-render-monitor" style="display: block; height: 250px; width: 1197px;"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% for year, year_values in data.items %}
+        <div class="card">
+            <div class="card-header">
+                <p class="card-header-title">
+                    <span class="icon">
+                        <i class="fas fa-calendar-alt"></i>
+                    </span>
+                    <span>Paychecks - {{ year|unlocalize }}</span>
+                </p>
+            </div>
+
+            <div class="card-content">
+                <div class="b-table">
+                    <div class="table-wrapper">
+                        <table class="table is-fullwidth is-striped is-hoverable is-fullwidth">
+                            <thead>
+                                <th></th>
+                                <th></th>
+                                <th><div class="has-text-right">January</div></th>
+                                <th><div class="has-text-right">February</div></th>
+                                <th><div class="has-text-right">March</div></th>
+                                <th><div class="has-text-right">April</div></th>
+                                <th><div class="has-text-right">May</div></th>
+                                <th><div class="has-text-right">June</div></th>
+                                <th><div class="has-text-right">July</div></th>
+                                <th><div class="has-text-right">August</div></th>
+                                <th><div class="has-text-right">September</div></th>
+                                <th><div class="has-text-right">October</div></th>
+                                <th><div class="has-text-right">November</div></th>
+                                <th><div class="has-text-right">December</div></th>
+                            </thead>
+                            <tbody>
+                                {% for category, category_values in year_values.items %}
+                                    {% if category != "Sum" %}
+                                        {% for item, item_values in category_values.items %}
+                                            {% if item != "Sum" %}
+                                                <tr>
+                                                    <td>{% if forloop.first %}<b>{{ category }}</b>{% endif %}</td>
+                                                    <td><b>{{ item }}</b></td>
+                                                    <td class="has-text-right">
+                                                        {% if item_values.amount.0 == item_values.real_amount.0 %}
+                                                            {% money_localize item_values.amount.0 %}
+                                                        {% else %}
+                                                            {% money_localize item_values.amount.0 %} ({% money_localize item_values.real_amount.0 %})
+                                                        {% endif %}
+                                                    </td>
+                                                    <td class="has-text-right">
+                                                        {% if item_values.amount.1 == item_values.real_amount.1 %}
+                                                            {% money_localize item_values.amount.1 %}
+                                                        {% else %}
+                                                            {% money_localize item_values.amount.1 %} ({% money_localize item_values.real_amount.1 %})
+                                                        {% endif %}
+                                                    </td>
+                                                    <td class="has-text-right">
+                                                        {% if item_values.amount.2 == item_values.real_amount.2 %}
+                                                            {% money_localize item_values.amount.2 %}
+                                                        {% else %}
+                                                            {% money_localize item_values.amount.2 %} ({% money_localize item_values.real_amount.2 %})
+                                                        {% endif %}
+                                                    </td>
+                                                    <td class="has-text-right">
+                                                        {% if item_values.amount.3 == item_values.real_amount.3 %}
+                                                            {% money_localize item_values.amount.3 %}
+                                                        {% else %}
+                                                            {% money_localize item_values.amount.3 %} ({% money_localize item_values.real_amount.3 %})
+                                                        {% endif %}
+                                                    </td>
+                                                    <td class="has-text-right">
+                                                        {% if item_values.amount.4 == item_values.real_amount.4 %}
+                                                            {% money_localize item_values.amount.4 %}
+                                                        {% else %}
+                                                            {% money_localize item_values.amount.4 %} ({% money_localize item_values.real_amount.4 %})
+                                                        {% endif %}
+                                                    </td>
+                                                    <td class="has-text-right">
+                                                        {% if item_values.amount.5 == item_values.real_amount.5 %}
+                                                            {% money_localize item_values.amount.5 %}
+                                                        {% else %}
+                                                            {% money_localize item_values.amount.5 %} ({% money_localize item_values.real_amount.5 %})
+                                                        {% endif %}
+                                                    </td>
+                                                    <td class="has-text-right">
+                                                        {% if item_values.amount.6 == item_values.real_amount.6 %}
+                                                            {% money_localize item_values.amount.6 %}
+                                                        {% else %}
+                                                            {% money_localize item_values.amount.6 %} ({% money_localize item_values.real_amount.6 %})
+                                                        {% endif %}
+                                                    </td>
+                                                    <td class="has-text-right">
+                                                        {% if item_values.amount.7 == item_values.real_amount.7 %}
+                                                            {% money_localize item_values.amount.7 %}
+                                                        {% else %}
+                                                            {% money_localize item_values.amount.7 %} ({% money_localize item_values.real_amount.7 %})
+                                                        {% endif %}
+                                                    </td>
+                                                    <td class="has-text-right">
+                                                        {% if item_values.amount.8 == item_values.real_amount.8 %}
+                                                            {% money_localize item_values.amount.8 %}
+                                                        {% else %}
+                                                            {% money_localize item_values.amount.8 %} ({% money_localize item_values.real_amount.8 %})
+                                                        {% endif %}
+                                                    </td>
+                                                    <td class="has-text-right">
+                                                        {% if item_values.amount.9 == item_values.real_amount.9 %}
+                                                            {% money_localize item_values.amount.9 %}
+                                                        {% else %}
+                                                            {% money_localize item_values.amount.9 %} ({% money_localize item_values.real_amount.9 %})
+                                                        {% endif %}
+                                                    </td>
+                                                    <td class="has-text-right">
+                                                        {% if item_values.amount.10 == item_values.real_amount.10 %}
+                                                            {% money_localize item_values.amount.10 %}
+                                                        {% else %}
+                                                            {% money_localize item_values.amount.10 %} ({% money_localize item_values.real_amount.10 %})
+                                                        {% endif %}
+                                                    </td>
+                                                    <td class="has-text-right">
+                                                        {% if item_values.amount.11 == item_values.real_amount.11 %}
+                                                            {% money_localize item_values.amount.11 %}
+                                                        {% else %}
+                                                            {% money_localize item_values.amount.11 %} ({% money_localize item_values.real_amount.11 %})
+                                                        {% endif %}
+                                                    </td>
+                                                </tr>
+                                            {% endif %}
+                                        {% endfor %}
+                                    {% endif %}
+                                {% endfor %}
+                            </tbody>
+                            <tfoot>
+                                {% for category, category_values in year_values.items %}
+                                    {% if category == "Sum" %}
+                                        <tr>
+                                            <th></th>
+                                            <th class="has-text-right">Total</th>
+                                            <th class="has-text-right">{% money_localize category_values.0.0 %}</th>
+                                            <th class="has-text-right">{% money_localize category_values.0.1 %}</th>
+                                            <th class="has-text-right">{% money_localize category_values.0.2 %}</th>
+                                            <th class="has-text-right">{% money_localize category_values.0.3 %}</th>
+                                            <th class="has-text-right">{% money_localize category_values.0.4 %}</th>
+                                            <th class="has-text-right">{% money_localize category_values.0.5 %}</th>
+                                            <th class="has-text-right">{% money_localize category_values.0.6 %}</th>
+                                            <th class="has-text-right">{% money_localize category_values.0.7 %}</th>
+                                            <th class="has-text-right">{% money_localize category_values.0.8 %}</th>
+                                            <th class="has-text-right">{% money_localize category_values.0.9 %}</th>
+                                            <th class="has-text-right">{% money_localize category_values.0.10 %}</th>
+                                            <th class="has-text-right">{% money_localize category_values.0.11 %}</th>
+                                        </tr>
+                                    {% endif %}
+                                {% endfor %}
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>  
+        </div>
+    {% endfor %}
+{% endblock %}
