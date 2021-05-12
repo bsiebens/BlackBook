@@ -98,7 +98,7 @@ class TransactionJournal(models.Model):
             else:
                 source_accounts.append(transaction["account"])
 
-        if self.type in [self.TransactionType.START, self.TransactionType.DEPOSIT, self.TransactionType.RECONCILIATION]:
+        if self.type in [self.TransactionType.DEPOSIT, self.TransactionType.RECONCILIATION]:
             if len(destination_accounts) == 0:
                 raise AttributeError("There should be at least one receiving transaction for this transaction type %s" % self.type)
 
