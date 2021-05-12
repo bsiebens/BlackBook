@@ -63,7 +63,7 @@ def accounts(request, account_type=None, account_slug=None):
             "assetaccount": {"name": "asset accounts", "icon": "fa-landmark", "total": {}},
             "revenueaccount": {"name": "revenue accounts", "icon": "fa-donate", "total": {}},
             "expenseaccount": {"name": "expense accounts", "icon": "fa-file-invoice-dollar", "total": {}},
-            "liabilities": {"name": "liabilities", "icon": "fa-home", "total": {}},
+            "liabilitiesaccount": {"name": "liabilities", "icon": "fa-home", "total": {}},
             "cashaccount": {"name": "cash accounts", "icon": "fa-coins", "total": {}},
         }
 
