@@ -48,7 +48,6 @@ INSTALLED_APPS = [
     "taggit",
     "taggit_helpers",
     "djmoney",
-    "djmoney.contrib.exchange",
     "django_filters",
 ]
 
