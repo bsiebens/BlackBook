@@ -88,7 +88,7 @@ class BudgetPeriod(models.Model):
 
         return Money(
             self.transactions.filter(type__in=[TransactionJournal.TransactionType.WITHDRAWAL, TransactionJournal.TransactionType.TRANSFER])
-            .filter(transactions__amount_currency=self.amount.currency)
+            .filter(amount_currency=self.amount.currency)
             .aggregate(total=Coalesce(Sum("amount"), Decimal(0)))["total"],
             self.amount.currency,
         )
