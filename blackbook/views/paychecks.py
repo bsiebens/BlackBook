@@ -43,10 +43,10 @@ def paychecks(request):
                     "real_amount": [Money(0, currency)] * 12,
                 }
 
-            data[paycheck.date.year][item.category.type][item.category.name]["amount"][paycheck.date.month - 1] = item.amount
-            data[paycheck.date.year][item.category.type][item.category.name]["real_amount"][paycheck.date.month - 1] = item.real_amount
+            data[paycheck.date.year][item.category.type][item.category.name]["amount"][paycheck.date.month - 1] += item.amount
+            data[paycheck.date.year][item.category.type][item.category.name]["real_amount"][paycheck.date.month - 1] += item.real_amount
 
-        data[paycheck.date.year]["Sum"][0][paycheck.date.month - 1] = paycheck.net_amount
+        data[paycheck.date.year]["Sum"][0][paycheck.date.month - 1] += paycheck.net_amount
 
     for paycheck in paychecks:
         if paycheck.date.month >= 1:
