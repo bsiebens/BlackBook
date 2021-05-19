@@ -5,4 +5,4 @@ from .profile import UserProfile
 from .transaction import TransactionJournal, Transaction
 from .category import Category
 from .budget import Budget, BudgetPeriod
-from .paycheck import Paycheck, PayCheckItem, PayCheckItemCategory, Bonus
+from .paycheck import PayCheck, PayCheckItem, PayCheckItemCategory, Bonus

@@ -112,7 +112,7 @@ class BudgetAdmin(admin.ModelAdmin):
     readonly_fields = ["uuid"]
 
 
-class PaycheckItemInline(admin.TabularInline):
+class PayCheckItemInline(admin.TabularInline):
     def item_type(self, obj):
         return obj.category.type
 
@@ -132,7 +132,7 @@ class PaycheckItemInline(admin.TabularInline):
 
 
 @admin.register(models.PayCheckItemCategory)
-class PaycheckItemCategoryAdmin(admin.ModelAdmin):
+class PayCheckItemCategoryAdmin(admin.ModelAdmin):
     def percentage(self, obj):
         return format_html("{obj.counterbalance_percentage}&nbsp;&percnt;".format(obj=obj))
 
@@ -142,8 +142,8 @@ class PaycheckItemCategoryAdmin(admin.ModelAdmin):
     list_filter = ["type", "counterbalance", "default"]
 
 
-@admin.register(models.Paycheck)
-class PaycheckAdmin(TotalsumAdmin):
+@admin.register(models.PayCheck)
+class PayCheckAdmin(TotalsumAdmin):
     def format_date(self, obj):
         return obj.date.strftime("%b %Y")
 
@@ -152,12 +152,13 @@ class PaycheckAdmin(TotalsumAdmin):
 
     ordering = ["date"]
     date_hierarchy = "date"
-    list_display = ["format_date", "amount", "uuid", "created", "modified"]
-    readonly_fields = ["amount", "created", "modified"]
-    inlines = [PaycheckItemInline]
-    fieldsets = [[None, {"fields": ("date", "amount")}], ["General information", {"fields": ("uuid",)}]]
+    list_display = ["format_date", "gross_amount", "net_amount", "hidden", "uuid", "created", "modified"]
+    list_filter = ["hidden"]
+    readonly_fields = ["gross_amount", "net_amount", "created", "modified"]
+    inlines = [PayCheckItemInline]
+    fieldsets = [[None, {"fields": ("date", "hidden", "gross_amount", "net_amount")}], ["General information", {"fields": ("uuid",)}]]
     readonly_fields = ["uuid"]
-    totalsum_list = ["amount"]
+    totalsum_list = ["gross_amount", "net_amount"]
     unit_of_measure = "&euro;"
 
 

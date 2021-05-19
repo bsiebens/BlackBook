@@ -37,6 +37,6 @@ urlpatterns = [
     path("budgets/delete/", budgets.delete, name="budgets_delete"),
     #
     #
-    # Paychecks
+    # PayChecks
     path("paychecks/", paychecks.paychecks, name="paychecks"),
 ]

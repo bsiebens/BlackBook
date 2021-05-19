@@ -1,7 +1,7 @@
 from django.db.models import Sum
 
 from djmoney.money import Money
-from datetime import timedelta
+from datetime import timedelta, date
 
 import json
 import re
@@ -56,7 +56,7 @@ class Chart:
                 "yAxes": [
                     {
                         "barPercentage": 1.6,
-                        "gridLines": {"drawBorder": False, "color": "rgba(29,140,248,0.0)", "zeroLineColor": "transparent"},
+                        "gridLines": {"drawBorder": False, "color": "rgba(225,78,202,0.1)", "zeroLineColor": "transparent"},
                         "ticks": {"padding": 20, "fontColor": "#9a9a9a"},
                     }
                 ],
@@ -71,6 +71,70 @@ class Chart:
                 ],
             },
         }
+
+
+class PayCheckChart(Chart):
+    def _generate_chart_options(self):
+        options = self._get_default_options()
+
+        options["scales"]["xAxes"][0]["time"]["unit"] = "quarter"
+
+        return options
+
+    def _generate_chart_data(self):
+        data = {
+            "type": "line",
+            "data": {
+                "labels": [],
+                "datasets": [
+                    {
+                        "label": "Paychecks (net amount)",
+                        "fill": "!1",
+                        "borderColor": "rgba({color}, 1.0)".format(color=get_color_code(1)),
+                        "borderWidth": 2,
+                        "borderDash": [],
+                        "borderDash0ffset": 0,
+                        "pointBackgroundColor": "rgba({color}, 1.0)".format(color=get_color_code(1)),
+                        "pointBorderColor": "rgba(255,255,255,0)",
+                        "pointHoverBackgroundColor": "rgba({color}, 1.0)".format(color=get_color_code(1)),
+                        "pointBorderWidth": 20,
+                        "pointHoverRadius": 4,
+                        "pointHoverBorderWidth": 15,
+                        "pointRadius": 4,
+                        "data": [],
+                    },
+                    {
+                        "label": "Paychecks (gross amount)",
+                        "fill": "!1",
+                        "borderColor": "rgba({color}, 1.0)".format(color=get_color_code(2)),
+                        "borderWidth": 2,
+                        "borderDash": [],
+                        "borderDash0ffset": 0,
+                        "pointBackgroundColor": "rgba({color}, 1.0)".format(color=get_color_code(2)),
+                        "pointBorderColor": "rgba(255,255,255,0)",
+                        "pointHoverBackgroundColor": "rgba({color}, 1.0)".format(color=get_color_code(2)),
+                        "pointBorderWidth": 20,
+                        "pointHoverRadius": 4,
+                        "pointHoverBorderWidth": 15,
+                        "pointRadius": 4,
+                        "data": [],
+                    },
+                ],
+            },
+        }
+
+        for paycheck in self.data:
+            if not paycheck.hidden:
+                paycheck_date = date(paycheck.date.year, paycheck.date.month, 15).strftime("%d %b %Y")
+                data["data"]["labels"].append(paycheck_date)
+                data["data"]["datasets"][0]["data"].append(float(paycheck.net_amount.amount))
+                data["data"]["datasets"][1]["data"].append(float(paycheck.gross_amount.amount))
+
+        if len(data) > 150:
+            data["data"]["datasets"][0]["pointRadius"] = 0
+            data["data"]["datasets"][1]["pointRadius"] = 0
+
+        return data
 
 
 class AccountChart(Chart):

@@ -10,19 +10,24 @@ from .base import get_default_currency
 import uuid
 
 
-class Paycheck(models.Model):
+class PayCheck(models.Model):
     date = models.DateField("date", default=timezone.localdate)
-    amount = MoneyField("amount", max_digits=15, decimal_places=2, default_currency=get_default_currency(), default=0)
+    net_amount = MoneyField("net amount", max_digits=15, decimal_places=2, default_currency=get_default_currency(), default=0)
+    gross_amount = MoneyField("gross amount", max_digits=15, decimal_places=2, default_currency=get_default_currency(), default=0)
     uuid = models.UUIDField("UUID", default=uuid.uuid4, editable=False, db_index=True, unique=True)
+    hidden = models.BooleanField(default=False)
 
     created = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return "Paycheck {date}".format(date=self.date.strftime("%b %Y"))
+        return "PayCheck {date}".format(date=self.date.strftime("%b %Y"))
 
     def update_amount(self, currency=get_default_currency()):
-        self.amount = Money(self.items.aggregate(amount=models.Sum("real_amount"))["amount"], currency)
+        self.net_amount = Money(self.items.aggregate(amount=models.Sum("real_amount"))["amount"], currency)
+        self.gross_amount = Money(
+            self.items.filter(category__type=PayCheckItemCategory.ItemType.GROSS).aggregate(amount=models.Sum("real_amount"))["amount"], currency
+        )
         self.save()
 
 
@@ -49,7 +54,7 @@ class PayCheckItemCategory(models.Model):
 
 
 class PayCheckItem(models.Model):
-    paycheck = models.ForeignKey(Paycheck, on_delete=models.CASCADE, related_name="items")
+    paycheck = models.ForeignKey(PayCheck, on_delete=models.CASCADE, related_name="items")
     category = models.ForeignKey(PayCheckItemCategory, on_delete=models.CASCADE, related_name="items")
     amount = MoneyField("amount", max_digits=10, decimal_places=2, default_currency=get_default_currency(), default=0)
     real_amount = MoneyField(max_digits=10, decimal_places=2, default_currency=get_default_currency(), default=0)
