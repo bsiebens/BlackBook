@@ -28,50 +28,54 @@ def paychecks(request):
     data = {}
 
     for paycheck in paychecks:
-        if paycheck.date.year not in data.keys():
-            data[paycheck.date.year] = {
-                "Gross amount": {},
-                "Taxable amount": {},
-                "Net amount": {},
-                "Sum": [[Money(0, currency)] * 12, [Money(0, currency)] * 12],
+        year = paycheck.date.year
+        month = paycheck.date.month
+
+        if year not in data.keys():
+            data[year] = {
+                "gross amount": {},
+                "taxable amount": {},
+                "net amount": {},
+                "sum": [],
             }
 
+            for i in range(12):
+                data[year]["sum"].append({"amount": Money(0, currency), "delta": Money(0, currency)})
+
         for item in paycheck.items.all():
-            if item.category.name not in data[paycheck.date.year][item.category.type].keys():
-                data[paycheck.date.year][item.category.type][item.category.name] = {
-                    "amount": [Money(0, currency)] * 12,
-                    "real_amount": [Money(0, currency)] * 12,
-                }
+            category_name = item.category.name
+            category_type = item.category.type.lower()
 
-            data[paycheck.date.year][item.category.type][item.category.name]["amount"][paycheck.date.month - 1] += item.amount
-            data[paycheck.date.year][item.category.type][item.category.name]["real_amount"][paycheck.date.month - 1] += item.real_amount
+            if category_name not in data[year][category_type].keys():
+                data[year][category_type][category_name] = []
+                for i in range(12):
+                    data[year][category_type][category_name].append({"amount": Money(0, currency), "delta": Money(0, currency)})
 
-        data[paycheck.date.year]["Sum"][0][paycheck.date.month - 1] += paycheck.net_amount
-
-    for paycheck in paychecks:
-        if paycheck.date.month >= 1:
-            data[paycheck.date.year]["Sum"][1][paycheck.date.month - 1] = (
-                paycheck.net_amount - data[paycheck.date.year]["Sum"][0][paycheck.date.month - 2]
-            )
-        else:
-            if (paycheck.date.year - 1) in data.keys():
-                data[paycheck.date.year]["Sum"][1][paycheck.date.month - 1] = paycheck.net_amount - data[paycheck.date.year - 1]["Sum"][0][11]
-            else:
-                data[paycheck.date.year]["Sum"][1][paycheck.date.month - 1] = paycheck.net_amount - Money(0, currency)
+            data[year][category_type][category_name][month - 1]["amount"] += item.amount
+            data[year][category_type][category_name][month - 1]["delta"] += item.amount
+        data[year]["sum"][month - 1]["amount"] += paycheck.net_amount
+        data[year]["sum"][month - 1]["delta"] += paycheck.net_amount
 
     for year in data.keys():
-        for key in ["Gross amount", "Taxable amount", "Net amount"]:
-            month_sum = [Money(0, currency)] * 12
-
-            for category in data[year][key].keys():
+        for category in ["gross amount", "taxable amount", "net amount"]:
+            for item in data[year][category].keys():
                 for i in range(12):
-                    if data[year][key][category]["real_amount"][i] != Money(0, currency):
-                        if month_sum[i] == Money(0, currency):
-                            month_sum[i] = data[year][key][category]["real_amount"][i]
-                        else:
-                            month_sum[i] += data[year][key][category]["real_amount"][i]
+                    if i > 0 and data[year]["sum"][i]["amount"] != Money(0, currency):
+                        data[year][category][item][i]["delta"] -= data[year][category][item][i - 1]["amount"]
+                    else:
+                        if (
+                            (year - 1) in data.keys()
+                            and item in data[(year - 1)][category].keys()
+                            and data[year]["sum"][i]["amount"] != Money(0, currency)
+                        ):
+                            data[year][category][item][i]["delta"] -= data[year][category][item][11]["amount"]
 
-            data[year][key]["Sum"] = month_sum
+        for i in range(12):
+            if i > 0:
+                data[year]["sum"][i]["delta"] -= data[year]["sum"][i - 1]["amount"]
+            else:
+                if (year - 1) in data.keys():
+                    data[year]["sum"][i]["delta"] -= data[year]["sum"][11]["amount"]
 
     chart = PayCheckChart(paychecks.order_by("date")).generate_json()
 

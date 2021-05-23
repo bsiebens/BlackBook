@@ -126,9 +126,15 @@ class PayCheckChart(Chart):
         for paycheck in self.data:
             if not paycheck.hidden:
                 paycheck_date = date(paycheck.date.year, paycheck.date.month, 15).strftime("%d %b %Y")
-                data["data"]["labels"].append(paycheck_date)
-                data["data"]["datasets"][0]["data"].append(float(paycheck.net_amount.amount))
-                data["data"]["datasets"][1]["data"].append(float(paycheck.gross_amount.amount))
+
+                if paycheck_date not in data["data"]["labels"]:
+                    data["data"]["labels"].append(paycheck_date)
+                    data["data"]["datasets"][0]["data"].append(float(paycheck.net_amount.amount))
+                    data["data"]["datasets"][1]["data"].append(float(paycheck.gross_amount.amount))
+                else:
+                    index = data["data"]["labels"].index(paycheck_date)
+                    data["data"]["datasets"][0]["data"][index] += float(paycheck.net_amount.amount)
+                    data["data"]["datasets"][1]["data"][index] += float(paycheck.gross_amount.amount)
 
         if len(data) > 150:
             data["data"]["datasets"][0]["pointRadius"] = 0

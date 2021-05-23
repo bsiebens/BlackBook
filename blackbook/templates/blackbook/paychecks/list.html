@@ -73,118 +73,44 @@
                                 {% for category, category_values in year_values.items %}
                                     {% if category != "Sum" %}
                                         {% for item, item_values in category_values.items %}
-                                            {% if item != "Sum" %}
-                                                <tr>
-                                                    <td>{% if forloop.first %}<b>{{ category }}</b>{% endif %}</td>
-                                                    <td><b>{{ item }}</b></td>
+                                            <tr>
+                                                <td>{% if forloop.first %}<b>{{ category }}</b>{% endif %}</td>
+                                                <td><b>{{ item }}</td>
+                                                {% for month in item_values %}
                                                     <td class="has-text-right">
-                                                        {% if item_values.amount.0 == item_values.real_amount.0 %}
-                                                            {% money_localize item_values.amount.0 %}
-                                                        {% else %}
-                                                            {% money_localize item_values.amount.0 %}<span class="is-size-7"><br />{% money_localize item_values.real_amount.0 %}</span>
+                                                        {% money_localize month.amount %}
+                                                        {% if month.delta.amount != 0 %}
+                                                            <br />
+                                                            <span class="is-size-7 has-text-{% if month.delta.amount > 0 %}success{% elif month.delta.amount < 0 %}danger{% else %}grey{% endif %}">
+                                                                {% if month.delta.amount > 0 %}+{% endif %}{% money_localize month.delta %}
+                                                            </span>
                                                         {% endif %}
                                                     </td>
-                                                    <td class="has-text-right">
-                                                        {% if item_values.amount.1 == item_values.real_amount.1 %}
-                                                            {% money_localize item_values.amount.1 %}
-                                                        {% else %}
-                                                            {% money_localize item_values.amount.1 %}<span class="is-size-7"><br />{% money_localize item_values.real_amount.1 %}</span>
-                                                        {% endif %}
-                                                    </td>
-                                                    <td class="has-text-right">
-                                                        {% if item_values.amount.2 == item_values.real_amount.2 %}
-                                                            {% money_localize item_values.amount.2 %}
-                                                        {% else %}
-                                                            {% money_localize item_values.amount.2 %}<span class="is-size-7"><br />{% money_localize item_values.real_amount.2 %}</span>
-                                                        {% endif %}
-                                                    </td>
-                                                    <td class="has-text-right">
-                                                        {% if item_values.amount.3 == item_values.real_amount.3 %}
-                                                            {% money_localize item_values.amount.3 %}
-                                                        {% else %}
-                                                            {% money_localize item_values.amount.3 %}<span class="is-size-7"><br />{% money_localize item_values.real_amount.3 %}</span>
-                                                        {% endif %}
-                                                    </td>
-                                                    <td class="has-text-right">
-                                                        {% if item_values.amount.4 == item_values.real_amount.4 %}
-                                                            {% money_localize item_values.amount.4 %}
-                                                        {% else %}
-                                                            {% money_localize item_values.amount.4 %}<span class="is-size-7"><br />{% money_localize item_values.real_amount.4 %}</span>
-                                                        {% endif %}
-                                                    </td>
-                                                    <td class="has-text-right">
-                                                        {% if item_values.amount.5 == item_values.real_amount.5 %}
-                                                            {% money_localize item_values.amount.5 %}
-                                                        {% else %}
-                                                            {% money_localize item_values.amount.5 %}<span class="is-size-7"><br />{% money_localize item_values.real_amount.5 %}</span>
-                                                        {% endif %}
-                                                    </td>
-                                                    <td class="has-text-right">
-                                                        {% if item_values.amount.6 == item_values.real_amount.6 %}
-                                                            {% money_localize item_values.amount.6 %}
-                                                        {% else %}
-                                                            {% money_localize item_values.amount.6 %}<span class="is-size-7"><br />{% money_localize item_values.real_amount.6 %}</span>
-                                                        {% endif %}
-                                                    </td>
-                                                    <td class="has-text-right">
-                                                        {% if item_values.amount.7 == item_values.real_amount.7 %}
-                                                            {% money_localize item_values.amount.7 %}
-                                                        {% else %}
-                                                            {% money_localize item_values.amount.7 %}<span class="is-size-7"><br />{% money_localize item_values.real_amount.7 %}</span>
-                                                        {% endif %}
-                                                    </td>
-                                                    <td class="has-text-right">
-                                                        {% if item_values.amount.8 == item_values.real_amount.8 %}
-                                                            {% money_localize item_values.amount.8 %}
-                                                        {% else %}
-                                                            {% money_localize item_values.amount.8 %}<span class="is-size-7"><br />{% money_localize item_values.real_amount.8 %}</span>
-                                                        {% endif %}
-                                                    </td>
-                                                    <td class="has-text-right">
-                                                        {% if item_values.amount.9 == item_values.real_amount.9 %}
-                                                            {% money_localize item_values.amount.9 %}
-                                                        {% else %}
-                                                            {% money_localize item_values.amount.9 %}<span class="is-size-7"><br />{% money_localize item_values.real_amount.9 %}</span>
-                                                        {% endif %}
-                                                    </td>
-                                                    <td class="has-text-right">
-                                                        {% if item_values.amount.10 == item_values.real_amount.10 %}
-                                                            {% money_localize item_values.amount.10 %}
-                                                        {% else %}
-                                                            {% money_localize item_values.amount.10 %}<span class="is-size-7"><br />{% money_localize item_values.real_amount.10 %}</span>
-                                                        {% endif %}
-                                                    </td>
-                                                    <td class="has-text-right">
-                                                        {% if item_values.amount.11 == item_values.real_amount.11 %}
-                                                            {% money_localize item_values.amount.11 %}
-                                                        {% else %}
-                                                            {% money_localize item_values.amount.11 %}<span class="is-size-7"><br />{% money_localize item_values.real_amount.11 %}</span>
-                                                        {% endif %}
-                                                    </td>
-                                                </tr>
-                                            {% endif %}
+                                                {% endfor %}
+                                            </tr>
                                         {% endfor %}
                                     {% endif %}
                                 {% endfor %}
                             </tbody>
                             <tfoot>
                                 {% for category, category_values in year_values.items %}
-                                    {% if category == "Sum" %}
+                                    {% if category == "sum" %}
                                         <tr>
                                             <th></th>
                                             <th class="has-text-right">Total</th>
-                                            <th class="has-text-right">{% money_localize category_values.0.0 %}<br /><span class="is-size-7 has-text-{% if category_values.1.0.amount < 0 %}danger{% elif category_values.1.0.amount > 0 %}success{% else %}grey{% endif %}">{% if category_values.1.0.amount > 0 %}+{% endif %}{% money_localize category_values.1.0 %}</span></th>
-                                            <th class="has-text-right">{% money_localize category_values.0.1 %}<br /><span class="is-size-7 has-text-{% if category_values.1.1.amount < 0 %}danger{% elif category_values.1.1.amount > 0 %}success{% else %}grey{% endif %}">{% if category_values.1.1.amount > 0 %}+{% endif %}{% money_localize category_values.1.1 %}</span></th>
-                                            <th class="has-text-right">{% money_localize category_values.0.2 %}<br /><span class="is-size-7 has-text-{% if category_values.1.2.amount < 0 %}danger{% elif category_values.1.2.amount > 0 %}success{% else %}grey{% endif %}">{% if category_values.1.2.amount > 0 %}+{% endif %}{% money_localize category_values.1.2 %}</span></th>
-                                            <th class="has-text-right">{% money_localize category_values.0.3 %}<br /><span class="is-size-7 has-text-{% if category_values.1.3.amount < 0 %}danger{% elif category_values.1.3.amount > 0 %}success{% else %}grey{% endif %}">{% if category_values.1.3.amount > 0 %}+{% endif %}{% money_localize category_values.1.3 %}</span></th>
-                                            <th class="has-text-right">{% money_localize category_values.0.4 %}<br /><span class="is-size-7 has-text-{% if category_values.1.4.amount < 0 %}danger{% elif category_values.1.4.amount > 0 %}success{% else %}grey{% endif %}">{% if category_values.1.4.amount > 0 %}+{% endif %}{% money_localize category_values.1.4 %}</span></th>
-                                            <th class="has-text-right">{% money_localize category_values.0.5 %}<br /><span class="is-size-7 has-text-{% if category_values.1.5.amount < 0 %}danger{% elif category_values.1.5.amount > 0 %}success{% else %}grey{% endif %}">{% if category_values.1.5.amount > 0 %}+{% endif %}{% money_localize category_values.1.5 %}</span></th>
-                                            <th class="has-text-right">{% money_localize category_values.0.6 %}<br /><span class="is-size-7 has-text-{% if category_values.1.6.amount < 0 %}danger{% elif category_values.1.6.amount > 0 %}success{% else %}grey{% endif %}">{% if category_values.1.6.amount > 0 %}+{% endif %}{% money_localize category_values.1.6 %}</span></th>
-                                            <th class="has-text-right">{% money_localize category_values.0.7 %}<br /><span class="is-size-7 has-text-{% if category_values.1.7.amount < 0 %}danger{% elif category_values.1.7.amount > 0 %}success{% else %}grey{% endif %}">{% if category_values.1.7.amount > 0 %}+{% endif %}{% money_localize category_values.1.7 %}</span></th>
-                                            <th class="has-text-right">{% money_localize category_values.0.8 %}<br /><span class="is-size-7 has-text-{% if category_values.1.8.amount < 0 %}danger{% elif category_values.1.8.amount > 0 %}success{% else %}grey{% endif %}">{% if category_values.1.8.amount > 0 %}+{% endif %}{% money_localize category_values.1.8 %}</span></th>
-                                            <th class="has-text-right">{% money_localize category_values.0.9 %}<br /><span class="is-size-7 has-text-{% if category_values.1.9.amount < 0 %}danger{% elif category_values.1.9.amount > 0 %}success{% else %}grey{% endif %}">{% if category_values.1.9.amount > 0 %}+{% endif %}{% money_localize category_values.1.9 %}</span></th>
-                                            <th class="has-text-right">{% money_localize category_values.0.10 %}<br /><span class="is-size-7 has-text-{% if category_values.1.10.amount < 0 %}danger{% elif category_values.1.10.amount > 0 %}success{% else %}grey{% endif %}">{% if category_values.1.10.amount > 0 %}+{% endif %}{% money_localize category_values.1.10 %}</span></th>
-                                            <th class="has-text-right">{% money_localize category_values.0.11 %}<br /><span class="is-size-7 has-text-{% if category_values.1.11.amount < 0 %}danger{% elif category_values.1.11.amount > 0 %}success{% else %}grey{% endif %}">{% if category_values.1.11.amount > 0 %}+{% endif %}{% money_localize category_values.1.11 %}</span></th>
+                                            {% for month in category_values %}
+                                                <th class="has-text-right">
+                                                    {% money_localize month.amount %}
+                                                    <br />
+                                                    <span class="is-size-7 has-text-{% if month.delta.amount < 0 and month.amount.amount != 0 %}danger{% elif month.delta.amount > 0 and month.amount.amount != 0 %}success{% else %}grey{% endif %}">
+                                                        {% if month.amount.amount != 0 %}
+                                                            {% if month.delta.amount > 0 %}+{% endif %}{% money_localize month.delta %}
+                                                        {% else %}
+                                                            {% money_localize month.amount %}
+                                                        {% endif %}
+                                                    </span>
+                                                </th>
+                                            {% endfor %}
                                         </tr>
                                     {% endif %}
                                 {% endfor %}
