@@ -68,14 +68,14 @@ def paychecks(request):
                             and item in data[(year - 1)][category].keys()
                             and data[year]["sum"][i]["amount"] != Money(0, currency)
                         ):
-                            data[year][category][item][i]["delta"] -= data[year][category][item][11]["amount"]
+                            data[year][category][item][i]["delta"] -= data[year - 1][category][item][11]["amount"]
 
         for i in range(12):
             if i > 0:
                 data[year]["sum"][i]["delta"] -= data[year]["sum"][i - 1]["amount"]
             else:
                 if (year - 1) in data.keys():
-                    data[year]["sum"][i]["delta"] -= data[year]["sum"][11]["amount"]
+                    data[year]["sum"][i]["delta"] -= data[year - 1]["sum"][11]["amount"]
 
     chart = PayCheckChart(paychecks.order_by("date")).generate_json()
 
