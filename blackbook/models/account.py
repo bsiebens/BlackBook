@@ -18,7 +18,7 @@ import uuid
 class Account(models.Model):
     class AccountType(models.TextChoices):
         ASSET_ACCOUNT = "assetaccount", "Asset Account"
-        REVENUE_ACCOUNT = "revenueaccount", "Revenue Account"
+        INCOME_ACCOUNT = "incomeaccount", "Income Account"
         EXPENSE_ACCOUNT = "expenseaccount", "Expense Account"
         LIABILITIES_ACCOUNT = "liabilitiesaccount", "Liabilities"
         CASH_ACCOUNT = "cashaccount", "Cash Account"
@@ -53,7 +53,7 @@ class Account(models.Model):
     def save(self, *args, **kwargs):
         type_to_icon = {
             "assetaccount": "fa-landmark",
-            "revenueaccount": "fa-donate",
+            "incomeaccount": "fa-donate",
             "expenseaccount": "fa-file-invoice-dollar",
             "liabilitiesaccount": "fa-home",
             "cashaccount": "fa-coins",

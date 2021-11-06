@@ -38,7 +38,7 @@ def transactions(request):
             )
 
         if filter_form.cleaned_data["account"] != "":
-            account_type = Account.AccountType.REVENUE_ACCOUNT
+            account_type = Account.AccountType.INCOME_ACCOUNT
             account_name = filter_form.cleaned_data["account"]
 
             for type in Account.AccountType:
@@ -139,7 +139,7 @@ def add_edit(request, transaction_uuid=None):
             if transaction_form.cleaned_data[account_type_key] != "":
                 account_name = transaction_form.cleaned_data[account_type_key]
 
-                account_type = Account.AccountType.REVENUE_ACCOUNT
+                account_type = Account.AccountType.INCOME_ACCOUNT
                 if account_type_key == "destination_account":
                     account_type = Account.AccountType.EXPENSE_ACCOUNT
 
