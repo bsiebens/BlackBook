@@ -185,3 +185,20 @@ class BonusAdmin(TotalsumAdmin):
     ]
     totalsum_list = ["gross_amount", "net_amount", "taxes"]
     unit_of_measure = "&euro;"
+
+
+class CurrencyConversionsInline(admin.TabularInline):
+    model = models.CurrencyConversion
+    extra = 0
+    fields = ["multiplier", "target", "timestamp"]
+    fk_name = "base"
+
+
+@admin.register(models.Currency)
+class CurrencyAdmin(admin.ModelAdmin):
+    list_display = ["code"]
+    search_fields = ["code"]
+    inlines = [CurrencyConversionsInline]
+    fieldsets = [
+        ["General information", {"fields": ["code"]}],
+    ]
