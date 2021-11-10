@@ -1,6 +1,8 @@
 from django.db import models
 from django.utils import timezone
 
+from decimal import Decimal
+
 
 class Currency(models.Model):
     code = models.CharField(max_length=10)
@@ -33,6 +35,9 @@ class CurrencyConversion(models.Model):
         conversion = None
         multiplier = 1
 
+        if base == target:
+            return amount
+
         # Let's first try to see if we can find a conversion rate from base to target
         try:
             conversion = cls.objects.filter(base__code=base, target__code=target).latest("timestamp")
@@ -51,4 +56,4 @@ class CurrencyConversion(models.Model):
         except cls.DoesNotExist:
             pass
 
-        return amount * multiplier
+        return Decimal(amount) * multiplier
