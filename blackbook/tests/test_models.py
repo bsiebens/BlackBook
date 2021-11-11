@@ -17,9 +17,9 @@ class CurrencyTest(TestCase):
     def setUpTestData(cls):
         cls.EUR = Currency.objects.create(code="EUR")
         cls.CHF = Currency.objects.create(code="CHF")
+        cls.USD = Currency.objects.create(code="USD")
 
-        date_yesterday = timezone.localdate() - timedelta(days=1)
-        cls.EUR_TO_CHF = CurrencyConversion.objects.create(base=cls.EUR, target=cls.CHF, multiplier=2, timestamp=date_yesterday)
+        cls.EUR_TO_CHF = CurrencyConversion.objects.create(base=cls.EUR, target=cls.CHF, multiplier=2)
 
     def testConversionWithString(self):
         eur_to_chf = CurrencyConversion.convert(base="EUR", target="CHF", amount=1)
@@ -65,8 +65,10 @@ class CurrencyTest(TestCase):
         self.assertEqual(eur_to_chf, 2)
 
     def testConversionWithNewerReverseConversionTimestamp(self):
-        CurrencyConversion.objects.create(base=self.CHF, target=self.EUR, multiplier=3)
+        date_yesterday = timezone.localdate() - timedelta(days=1)
+        CurrencyConversion.objects.create(base=self.EUR, target=self.USD, multiplier=2, timestamp=date_yesterday)
+        CurrencyConversion.objects.create(base=self.USD, target=self.EUR, multiplier=3)
 
-        eur_to_chf = CurrencyConversion.convert(base="EUR", target="CHF", amount=1)
+        eur_to_usd = CurrencyConversion.convert(base="EUR", target="USD", amount=1)
 
-        self.assertAlmostEqual(eur_to_chf, Decimal(0.33), places=2)
+        self.assertAlmostEqual(eur_to_usd, Decimal(0.33), places=2)

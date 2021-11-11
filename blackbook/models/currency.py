@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models import Q
 from django.utils import timezone
 
 from decimal import Decimal
@@ -44,20 +45,17 @@ class CurrencyConversion(models.Model):
         if base == target:
             return amount
 
-        # Let's first try to see if we can find a conversion rate from base to target
         try:
-            conversion_object = cls.objects.filter(base__code=base, target__code=target).latest("timestamp")
-            multiplier = conversion_object.multiplier
+            conversion_object = (
+                cls.objects.filter(Q(base__code=base, target__code=target) | Q(base__code=target, target__code=base))
+                .select_related()
+                .latest("timestamp")
+            )
 
-        except cls.DoesNotExist:
-            pass
-
-        # Let's try to see if there is maybe a newer or reverse conversion rate?
-        try:
-            reverse_conversion = cls.objects.filter(base__code=target, target__code=base).latest("timestamp")
-
-            if conversion_object is None or conversion_object.timestamp < reverse_conversion.timestamp:
-                multiplier = 1 / reverse_conversion.multiplier
+            if conversion_object.base.code == str(base):
+                multiplier = conversion_object.multiplier
+            else:
+                multiplier = 1 / conversion_object.multiplier
 
         except cls.DoesNotExist:
             pass
