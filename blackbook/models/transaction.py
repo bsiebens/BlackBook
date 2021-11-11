@@ -64,11 +64,14 @@ class Transaction(models.Model):
         empty_transaction_index = -1
 
         for index, transaction in enumerate(transactions):
-            
+            if transaction["amount"] == "" or transaction["amount"] is None:
+                if empty_transaction_index != -1:
+                    raise ValidationError("Only 1 sub transaction can have an empty amount specified.")
 
+                empty_transaction_index = index
 
-
-
+            else:
+                pass
 
     @classmethod
     def create2(cls, short_description, transactions, date=timezone.localdate(), description=None, payee=None, category=None):
