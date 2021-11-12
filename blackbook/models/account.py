@@ -10,9 +10,8 @@ from djmoney.money import Money
 from decimal import Decimal
 from mptt.models import MPTTModel, TreeForeignKey
 
-from .base import get_default_currency, get_currency_choices
 from .currency import Currency
-from ..utilities import calculate_period, unique_slugify
+from ..utilities import unique_slugify
 
 import uuid
 
@@ -74,7 +73,7 @@ class Account(MPTTModel):
         super(Account, self).save(*args, **kwargs)
 
     @classmethod
-    def get_or_create(cls, account_string):
+    def get_or_create(cls, account_string, return_last=True):
         account_tree = account_string.split(":")
         accounts = []
         parent_account = None
@@ -92,6 +91,9 @@ class Account(MPTTModel):
                 account, created = cls.objects.get_or_create(name=account_name, parent=parent_account, type=account_type)
                 accounts.append((account, created))
                 parent_account = account
+
+        if return_last:
+            return accounts[-1][0]
 
         return accounts
 

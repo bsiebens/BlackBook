@@ -2,7 +2,7 @@ from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import Sum, base
 from django.utils import timezone
-from django.utils.functional import cached_property
+from django.utils.functional import cached_property, empty
 
 from djmoney.models.fields import MoneyField
 from djmoney.money import Money
@@ -14,6 +14,7 @@ from .category import Category
 from .budget import BudgetPeriod
 
 import uuid
+import operator
 
 
 class Transaction(models.Model):
@@ -39,29 +40,33 @@ class Transaction(models.Model):
 
         super(Transaction, self).save(*args, **kwargs)
 
-    @classmethod
-    def create(cls, short_description, transactions, date=timezone.localdate(), description=None, payee=None, category=None):
-        """Transactions should be in a fixed format
-        {
-            "account", "amount", "currency"
-        }"""
+    def update_transactions(self, transactions, user=None):
+        self.transaction_legs.all().delete()
 
+        transaction_legs = self.__verify_transactions_and_prepare_for_saving(transactions=transactions, user=user)
+        TransactionLeg.objects.bulk_create(transaction_legs)
+
+        return self
+
+    def __verify_transactions_and_prepare_for_saving(self, transactions, user=None):
         # In order to proceed we will first convert all values in the transactions dictionary to proper objects
         for transaction in transactions:
-            if type(transaction["currency"]) == str:
+            if type(transaction["currency"]) == str and transaction["currency"] != "" and transaction["currency"] is not None:
                 transaction["currency"], created = Currency.objects.get_or_create(code=transaction["currency"])
 
             if type(transaction["account"]) == str:
                 # Here the format should be with a ":" separting the different accounts, the first level should always specify the account type
-                account_tree = Account.get_or_create(transaction["account"])
-                transaction["account"] = account_tree[-1][0]
+                account = Account.get_or_create(transaction["account"])
+                transaction["account"] = account
 
         # Now we run a check on the different transaction legs to verify if the sum of all legs equals to zero.
         # One leg is allowed to be "empty", in case it has a currency set we will use that currency to fill up the leg, otherwise it will default to
         # a random base currency that's used on the transaction.
         total_amount_per_currency = {}
         total_baseline_amount = 0
+
         empty_transaction_index = -1
+        default_currency, created = Currency.objects.get_or_create(code=get_default_currency(user=user))
 
         for index, transaction in enumerate(transactions):
             if transaction["amount"] == "" or transaction["amount"] is None:
@@ -70,56 +75,42 @@ class Transaction(models.Model):
 
                 empty_transaction_index = index
 
+                currency = transaction["currency"]
+                if currency == "" or currency is None:
+                    currency = default_currency
+
+                # Just making sure that the currency exists in the total_amount_per_currency list
+                total_amount_per_currency[currency] = total_amount_per_currency.get(currency, 0)
+
             else:
-                pass
-
-    @classmethod
-    def create2(cls, short_description, transactions, date=timezone.localdate(), description=None, payee=None, category=None):
-        # For each transaction we attempt to convert string values into proper objects
-        for transaction in transactions:
-            if type(transaction["currency"]) == str:
-                pass
-
-        # First run a check on the different transactions to confirm if they equal to zero
-        total_amount_per_currency = {}
-        total_baseline_amount = 0
-        empty_transaction_index = -1
-
-        for index, transaction in enumerate(transactions):
-            if transaction["amount"] is None or transaction["amount"] == "":
-                if empty_transaction_index != -1:
-                    raise ValidationError("Only 1 transaction leg can have an empty amount specificed.")
-
-                empty_transaction_index = index
-
-            if transaction["amount"] != "" and transaction["amount"] is not None:
                 total_amount_per_currency[transaction["currency"]] = total_amount_per_currency.get(transaction["currency"], 0) + transaction["amount"]
 
+        # This should never be below 1, but doesn't hurt to be sure
         if len(total_amount_per_currency.keys()) >= 1:
-            baseline_currency = None
+            # In case there is one currency, we set that to the baseline currency otherwise we take the currency with the highest amount
+            baseline_currency = list(total_amount_per_currency.keys())[0]
+
+            if len(total_amount_per_currency.keys()) > 1 and default_currency in total_amount_per_currency.keys():
+                baseline_currency = default_currency
 
             for currency, amount in total_amount_per_currency.items():
-                if baseline_currency is None:
-                    baseline_currency = currency
-
-                if amount == "" or amount is None:
-                    continue
-
                 total_baseline_amount += CurrencyConversion.convert(base=currency, target=baseline_currency, amount=amount)
 
             if empty_transaction_index != -1:
-                currency = transactions[empty_transaction_index]["currency"]
+                transaction = transactions[empty_transaction_index]
 
-                if currency is None or currency == "":
-                    currency = baseline_currency
+                if transaction["currency"] == "" or transaction["currency"] is None:
+                    transaction["currency"] = baseline_currency
 
-                transactions[empty_transaction_index]["amount"] = (
-                    CurrencyConversion.convert(base=baseline_currency, target=currency, amount=total_baseline_amount) * -1
+                transaction["amount"] = (
+                    CurrencyConversion.convert(base=baseline_currency, target=transaction["currency"], amount=total_baseline_amount) * -1
                 )
-                transactions[empty_transaction_index]["currency"] = currency
+                transactions[empty_transaction_index] = transaction
 
+                # Set total baseline_amount to 0 as it should now balance
                 total_baseline_amount = 0
 
+            # Verify if total baseline_amount is 0, if not we have an issue
             if total_baseline_amount != 0:
                 raise ValidationError(
                     "Total sum of all transaction legs should be 0 (now {total_sum} {base_currency}).".format(
@@ -127,25 +118,39 @@ class Transaction(models.Model):
                     )
                 )
 
+            transactionlegs = []
+            for transaction in transactions:
+                transactionleg = TransactionLeg(
+                    account=transaction["account"], amount=transaction["amount"], currency=transaction["currency"], transaction=self
+                )
+                transactionlegs.append(transactionleg)
+
+            return transactionlegs
+
+        return []
+
+    @classmethod
+    def create(cls, short_description, transactions, date=timezone.localdate(), description=None, payee=None, category=None, user=None):
+        """Transactions should be in a fixed format
+        {
+            "account", "amount", "currency"
+        }"""
+
         transaction_object = cls.objects.create(
             short_description=short_description, date=date, description=description, payee=payee, category=category
         )
 
-        transactionlegs = []
-        for transaction in transactions:
-            account, created = Account.objects.get_or_create(name=transaction["name"])
-            currency, created = Currency.objects.get_or_create(code=transaction["currency"])
-
-            transactionlegs.append(TransactionLeg(transaction=transaction_object, account=account, amount=transaction["amount"], currency=currency))
-
+        transactionlegs = transaction_object.__verify_transactions_and_prepare_for_saving(transactions=transactions, user=user)
         TransactionLeg.objects.bulk_create(transactionlegs)
+
+        return transaction_object
 
 
 class TransactionLeg(models.Model):
     transaction = models.ForeignKey(Transaction, on_delete=models.CASCADE, related_name="transaction_legs")
     account = models.ForeignKey(Account, on_delete=models.CASCADE)
     amount = models.DecimalField(max_digits=20, decimal_places=10)
-    currency = models.ForeignKey(Currency, blank=True, null=True, on_delete=models.SET_NULL)
+    currency = models.ForeignKey(Currency, null=True, on_delete=models.SET_NULL)
 
     def __str__(self):
         return "{i.account} {i.amount} {i.currency.code}".format(i=self)
